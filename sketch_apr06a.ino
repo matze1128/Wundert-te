@@ -29,6 +29,7 @@ void loop() {
     Blinktime=  random(200, 2000);
     Serial.println(Blinktime); //To check if the random function has a problem
     strip.show();
+    123
   }
 
 }
