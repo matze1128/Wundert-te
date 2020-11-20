@@ -9,11 +9,13 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 int Star;
 int Schnuppenpos;
 unsigned long Schnuppentimer;
-int Starnumber = 50;
+int Starnumber = 10;
 int StarPositions[50];
 unsigned long StarDuration[50];
 unsigned long StarTimeSet[50];
 int CurrentBrightness[50];
+int MaxStarTime = 10000;
+int MinStarTime = 400;
 
 void setup() {
 
@@ -37,12 +39,10 @@ void loop() {
 void Sternhimmel(){
   
     for(int i= 0; i<Starnumber; i++){
-      //delay(10);
       if(millis() - StarTimeSet[i] >= StarDuration[i]){
         strip.setPixelColor(StarPositions[i],0 ,0 ,0); // Turns the previous Star to off
         StarPositions[i]= random(LED_COUNT);
-        //strip.setPixelColor(StarPositions[i], 255, 255, 0); //anables the next Star on a random position
-        StarDuration[i]= random(2000, 10000);
+        StarDuration[i]= random(MinStarTime, MaxStarTime);
         StarTimeSet[i]=millis();
       }
     }
@@ -51,18 +51,24 @@ void Sternhimmel(){
 
 void StarBrightness(){
   for(int i= 0; i<Starnumber; i++){
-    CurrentBrightness[i]= ((255000/StarDuration[i])*(millis()-StarTimeSet[i]))/1000;
-    strip.setPixelColor(StarPositions[i], CurrentBrightness[i], CurrentBrightness[i], 0); 
+    if(millis()-StarTimeSet[i] <= (StarDuration[i] / 2)){
+      CurrentBrightness[i]= ((255000/StarDuration[i])*(millis()-StarTimeSet[i]))/500;              // rise Brightness
+      strip.setPixelColor(StarPositions[i], CurrentBrightness[i], CurrentBrightness[i], 0);
+    }
+    else{
+       CurrentBrightness[i]= 510 - ((255000/StarDuration[i])*(millis()-StarTimeSet[i]))/500;         // lower Brightness
+       strip.setPixelColor(StarPositions[i], CurrentBrightness[i], CurrentBrightness[i], 0);
+    }
   }
 }
 
-void speedcheck(){
-  if(millis()- Schnuppentimer >= 1){
+void ShootingStar(){
+  if(millis()- Schnuppentimer >= 10){
     Schnuppenpos++;
     strip.setPixelColor(Schnuppenpos, 0, 0, 255);
     strip.setPixelColor(Schnuppenpos-1,0,0,0);
     Schnuppentimer= millis();
-    if(Schnuppenpos == 144){
+    if(Schnuppenpos == LED_COUNT){
       Schnuppenpos= 0;
     }
   }
