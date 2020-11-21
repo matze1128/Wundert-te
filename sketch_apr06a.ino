@@ -6,16 +6,28 @@
 #define LED_COUNT 144
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
-int Star;
-int Schnuppenpos;
-unsigned long Schnuppentimer;
-int Starnumber = 10;
+
+int Starnumber = 4;
 int StarPositions[50];
 unsigned long StarDuration[50];
 unsigned long StarTimeSet[50];
 int CurrentBrightness[50];
 int MaxStarTime = 10000;
 int MinStarTime = 400;
+
+#define RA 255000 //*1000 (0-255)
+#define GA 255000 //*1000
+#define BA 10000  //*1000
+
+int FRA;
+int FGA;
+int FBA;
+int Length= 50;
+int Schnuppenpos;
+unsigned long Schnuppentimer;
+int maxVerweildauer= 70;
+int Vorgluehen= 2;
+int Schnuppenstaerke= 700; //zwischen 0 und 1000
 
 void setup() {
 
@@ -30,7 +42,7 @@ void setup() {
 void loop() {
   Sternhimmel();
   StarBrightness();
-  speedcheck();
+  ShootingStar();
   strip.show();
   }
 
@@ -65,10 +77,22 @@ void StarBrightness(){
 void ShootingStar(){
   if(millis()- Schnuppentimer >= 10){
     Schnuppenpos++;
-    strip.setPixelColor(Schnuppenpos, 0, 0, 255);
-    strip.setPixelColor(Schnuppenpos-1,0,0,0);
+    for(int i= Schnuppenpos; i> Schnuppenpos- Vorgluehen; i--){
+      if(i>0){
+        strip.setPixelColor(i, GA/1000, RA/1000, BA/1000);   //set first Pixels on full brightness
+      }
+    }
+    for(int i= Schnuppenpos- Vorgluehen; i> Schnuppenpos- Length; i--){
+      FRA = (RA - (RA/maxVerweildauer) * i) /1000;
+      FGA = (GA - (GA/maxVerweildauer) * i) /1000;
+      FBA = (BA - (BA/maxVerweildauer) * i) /1000;
+      strip.setPixelColor(i, strip.Color(map(Schnuppenstaerke, 0, 1000, 0 ,FGA), map(Schnuppenstaerke, 0, 1000, 0, FRA), FBA * 0.8));
+    }
+    strip.setPixelColor(Schnuppenpos- Length, 0, 0, 0);
+
+    
     Schnuppentimer= millis();
-    if(Schnuppenpos == LED_COUNT){
+    if(Schnuppenpos == maxVerweildauer + Length){
       Schnuppenpos= 0;
     }
   }
