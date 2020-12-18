@@ -7,13 +7,13 @@
 #define LED_PIN 6
 #define LED_COUNT 144
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-String valueNames[] =               {"Sternanzahl", "Max. Sterndauer", "Min. Sterndauer", "Max. Cometlength", "Max. Cometbreak", "Min. cometbreak", "Max. comettime", "cometluminosuity", "Main comet size", "Min. cometspeed"};
-unsigned long values[] =            {10           , 100              , 50               , 20                , 5              , 2          , 144             , 10                , 2                , 4                };
-unsigned long maxvalues[] =         {50           , 200              , 200              , 40                , 200              , 200           , 150             , 100               , 5                , 15               };
-unsigned long minvalues[] =         {0            , 1                , 1                , 8                 ,1                  , 1            , 40              , 10                , 1                , 1                };
-unsigned long fertigevalues[9];  
+String valueNames[] =               {"Sternanzahl", "Max. Sterndauer", "Min. Sterndauer", "Max. Cometlength", "Max. Cometbreak", "Min. cometbreak", "Max. comettime", "cometluminosuity", "Main comet size", "Min.cometspeed"};
+unsigned long values[] =            {5            , 20               , 6                , 25                , 25               , 5                , 144             , 10                , 2                , 4                };
+unsigned long maxvalues[] =         {50           , 200              , 200              , 40                , 200              , 200              , 150             , 100               , 5                , 15               };
+unsigned long minvalues[] =         {0            , 1                , 1                , 8                 , 1                , 1                , 40              , 10                , 1                , 1                };
+unsigned long fertigevalues[] =     {0            , 20000            , 6000             , 0                 , 25000            , 5000             , 0               , 0                 , 0                , 0                };
 
-                                   //0              1                   2                3                4               5                 6                 7                   8                 9
+                                   //0              1                   2                3                   4                   5                  6                  7                   8                 9
  
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
@@ -43,7 +43,7 @@ int Menupunkt = 0;
 unsigned long refreshTimer;
 int letzterstatus; // Um beim erhöhen von Menupunkt nicht direkt den neuen Menupunkt zu verändern
 int letzterstatusvergleich;
-String leer = "     ";
+
 
 
 void setup() {
@@ -72,24 +72,23 @@ void loop() {
 void LCDpanel(){
   lcd.setCursor(0,0);
   lcd.print(valueNames[Menupunkt]);
-  if(Menupunkt == 0)
-  {
-    lcd.setCursor(11, 0);
-    lcd.print(":    ");
-  }
+  lcd.setCursor(valueNames[Menupunkt].length(),0);
+  lcd.print("     ");
   lcd.setCursor(0,1);
-  lcd.print(values[Menupunkt]);
-  
-  for(int i = 1; i <= 5; i++)                                         // überschüssige alte zahlen entfernen
+  lcd.print(values[Menupunkt]);                                   
+  if(values[Menupunkt] < 10)         // überschüssige alte zahlen entfernen
   {
-    if(values[Menupunkt] < (10 * i))
-    {
-      lcd.setCursor(i, 1);
-      lcd.print("     ");
-    }
+    lcd.setCursor(1, 1);
+    lcd.print("     ");
   }
-  
+  if(values[Menupunkt] < 100)
+  {
+    lcd.setCursor(2, 1);
+    lcd.print("     ");
+  }
 }
+
+
 void valuesinmillisek()
 {
   if(Menupunkt == 1 || Menupunkt == 2 || Menupunkt == 4 || Menupunkt == 5)
