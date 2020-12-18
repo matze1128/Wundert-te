@@ -8,10 +8,10 @@
 #define LED_COUNT 144
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 String valueNames[] =               {"Sternanzahl", "Max. Sterndauer", "Min. Sterndauer", "Max. Cometlength", "Max. Cometbreak", "Min. cometbreak", "Max. comettime", "cometluminosuity", "Main comet size", "Min. cometspeed"};
-unsigned long values[] =            {10           , 10000            , 400         , 20                , 3000        , 1000          , 144             , 10                , 2                , 4                };
-unsigned long maxvalues[] =         {50           , 200000              , 200000         , 40                , 200000         , 200000           , 150             , 100               , 5                , 15               };
-unsigned long minvalues[] =         {0            , 1000                , 1000           , 8                 ,1000            , 1000             , 40              , 10                , 1                , 1                };
-int fertigevalues[9];  
+unsigned long values[] =            {10           , 100              , 50               , 20                , 5              , 2          , 144             , 10                , 2                , 4                };
+unsigned long maxvalues[] =         {50           , 200              , 200              , 40                , 200              , 200           , 150             , 100               , 5                , 15               };
+unsigned long minvalues[] =         {0            , 1                , 1                , 8                 ,1                  , 1            , 40              , 10                , 1                , 1                };
+unsigned long fertigevalues[9];  
 
                                    //0              1                   2                3                4               5                 6                 7                   8                 9
  
@@ -63,8 +63,8 @@ void loop() {
   ShootingStar();
   strip.show();
   Taster();
-  //valuesinsek();
-  //LCDpanel();
+  valuesinmillisek();
+  LCDpanel();
   Serial.print(Menupunkt);
   Serial.println(values[Menupunkt]);
   }
@@ -79,26 +79,22 @@ void LCDpanel(){
   }
   lcd.setCursor(0,1);
   lcd.print(values[Menupunkt]);
-  /*
+  
   for(int i = 1; i <= 5; i++)                                         // überschüssige alte zahlen entfernen
   {
-    if(fertigevalues[Menupunkt] < (10 * i))
+    if(values[Menupunkt] < (10 * i))
     {
       lcd.setCursor(i, 1);
       lcd.print("     ");
     }
   }
-  */
+  
 }
-void valuesinsek()
+void valuesinmillisek()
 {
   if(Menupunkt == 1 || Menupunkt == 2 || Menupunkt == 4 || Menupunkt == 5)
   {
-     fertigevalues[Menupunkt] = values[Menupunkt] / 1000;
-  }
-  else
-  {
-    fertigevalues[Menupunkt] = values[Menupunkt];
+     fertigevalues[Menupunkt] = values[Menupunkt] * 1000;
   }
 }
 
@@ -108,7 +104,7 @@ void Sternhimmel(){
       if(millis() - StarTimeSet[i] >= StarDuration[i]){
         strip.setPixelColor(StarPositions[i],0 ,0 ,0); // Turns the previous Star to off
         StarPositions[i]= random(LED_COUNT);
-        StarDuration[i]= random(values[2], values[1]);
+        StarDuration[i]= random(fertigevalues[2], fertigevalues[1]);
         StarTimeSet[i]=millis();
       }
     }
@@ -160,7 +156,7 @@ void ShootingStar(){
       maxVerweildauer= random(Length + 20, values[6]);
       Schnuppenpos= random(maxVerweildauer - Length * 0.5);
       Schnuppenpausentimer= millis();
-      Schnuppenpause= random(values[5], values[4]);
+      Schnuppenpause= random(fertigevalues[5], fertigevalues[4]);
       cometspeed= random(values[9]);
       
 
@@ -183,6 +179,11 @@ void Taster(){
       tasterTimer = millis();
       letzterstatus = analogRead(A0);
       letzterstatusvergleich = 0;
+
+      if(Menupunkt == 7)   // Fixed problem with reset of Schnuppenpause
+      {
+        Schnuppenpause = millis();
+      }
 
   }
   if(letzterstatus - analogRead(A0) >= 20 || letzterstatus - analogRead(A0) <= -20)
