@@ -42,7 +42,12 @@ int letzterstatus; // Um beim erhöhen von Menupunkt nicht direkt den neuen Menu
 int letzterstatusvergleich;
 
 int on = true;
-int mode;
+int mode = 2;
+int potiPin = A0;
+int rotVar = 0 ;            // Variable zum speichern der Werte für die Ausgabe
+int gruenVar = 0 ;          // Variable zum speichern der Werte für die Ausgabe
+int blauVar = 0 ;           // Variable zum speichern der Werte für die Ausgabe
+int potiVar = 0 ;           // Variable zum speichern des Potentiometereingangs  
 
 void setup() {
 
@@ -50,6 +55,7 @@ void setup() {
   #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
   #endif
   pinMode(BUTTON_PIN, INPUT);
+  pinMode(A2, INPUT_PULLUP);
   strip.begin();
   lcd.begin(16, 2);
 }
@@ -59,11 +65,66 @@ void setup() {
 
 void loop() 
 {
-  Sternhimmel();
+  Serial.println(analogRead(A2));
+  strip.setBrightness(10);
+  setMode();
+  if(mode == 1)
+  {
+    Sternhimmel();
+  }
+  if(mode == 2)
+  {
+    oneColor();
+  }
+  strip.show();
 }
 
+void setMode()
+{
+  if(analogRead(A2) < 500)
+  {
+    mode = 2;
+  }
+  else
+  {
+    mode = 1;
+  }
+}
 
-
+void oneColor()
+{
+  potiVar = analogRead(potiPin) ;
+  
+  if(potiVar < 341)      // Unteres Drittel des Potenziometerbereichs (0-340)
+  {                  
+    potiVar = (potiVar * 3) / 4;   // Den Wert auf 0-255 umrechnen
+ 
+    rotVar = 256 - potiVar;        // Rot von an nach aus
+    gruenVar = potiVar;            // Grün von aus nach an
+    blauVar = 0;                   // Blau aus
+  }
+  else if(potiVar < 682)     // Mittleres Drittel des Potenziometerbereichs (341-681)
+  {
+    potiVar = ( (potiVar-341) * 3) / 4;     // Den Wert auf 0-255 umrechnen
+ 
+    rotVar = 0;                    // Rot aus
+    gruenVar = 256 - potiVar;      // Grün von an nach aus
+    blauVar = potiVar;             // Blau von aus nach an
+  }
+  else      // Oberes Drittel des Potenziometerbereichs (682-1023)
+  {
+    potiVar = ( (potiVar-683) * 3) / 4;     // Den Wert auf 0-255 umrechnen
+ 
+    rotVar = potiVar;              // Rot von aus nach an
+    gruenVar = 0;                  // Grün aus
+    blauVar = 256 - potiVar;       // Blau von an nach aus
+  }
+  
+  for(int i = 0;i <= LED_COUNT;i++)
+  {
+    strip.setPixelColor(i, gruenVar, rotVar, blauVar);
+  }
+}
 
 
 
@@ -73,7 +134,6 @@ void Sternhimmel()
   Stars();
   StarBrightness();
   ShootingStar();
-  strip.show();
   Taster();
   valuesinmillisek();
   LCDpanel();
