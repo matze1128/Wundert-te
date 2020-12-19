@@ -14,7 +14,6 @@ unsigned long minvalues[] =         {0            , 1                , 1        
 unsigned long fertigevalues[] =     {0            , 20000            , 6000             , 0                 , 25000            , 5000             , 0               , 0                 , 0                , 0                };
 
                                    //0              1                   2                3                   4                   5                  6                  7                   8                 9
- 
 const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
@@ -26,11 +25,9 @@ int Length= 15;
 #define RA 255000 //*1000 (0-255)
 #define GA 255000 //*1000
 #define BA 10000  //*1000
-
 int FRA;
 int FGA;
 int FBA;
-
 unsigned long StarDuration[50];
 unsigned long StarTimeSet[50];
 int Schnuppenpos;
@@ -44,7 +41,8 @@ unsigned long refreshTimer;
 int letzterstatus; // Um beim erhöhen von Menupunkt nicht direkt den neuen Menupunkt zu verändern
 int letzterstatusvergleich;
 
-
+int on = true;
+int mode;
 
 void setup() {
 
@@ -56,18 +54,30 @@ void setup() {
   lcd.begin(16, 2);
 }
 
-void loop() {
-  strip.setBrightness(values[7]);
+
+
+
+void loop() 
+{
   Sternhimmel();
+}
+
+
+
+
+
+
+void Sternhimmel()
+{
+  strip.setBrightness(values[7]);
+  Stars();
   StarBrightness();
   ShootingStar();
   strip.show();
   Taster();
   valuesinmillisek();
   LCDpanel();
-  Serial.print(Menupunkt);
-  Serial.println(values[Menupunkt]);
-  }
+}
 
 void LCDpanel(){
   lcd.setCursor(0,0);
@@ -89,6 +99,8 @@ void LCDpanel(){
 }
 
 
+
+
 void valuesinmillisek()
 {
   if(Menupunkt == 1 || Menupunkt == 2 || Menupunkt == 4 || Menupunkt == 5)
@@ -97,7 +109,7 @@ void valuesinmillisek()
   }
 }
 
-void Sternhimmel(){
+void Stars(){
   
     for(int i= 0; i<values[0]; i++){
       if(millis() - StarTimeSet[i] >= StarDuration[i]){
@@ -129,7 +141,7 @@ void StarBrightness(){
        strip.setPixelColor(StarPositions[i], CurrentBrightness[i], CurrentBrightness[i], 0);
     }
   }
-    
+  strip.show();
 }
 
 void ShootingStar(){
