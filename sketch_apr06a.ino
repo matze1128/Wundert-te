@@ -9,7 +9,7 @@
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 String valueNames[] =               {"Sternanzahl", "Max. Sterndauer", "Min. Sterndauer", "Max. Cometlength", "Max. Cometbreak", "Min. cometbreak", "Max. comettime", "cometluminosuity", "Main comet size", "Min.cometspeed"};
 unsigned long values[] =            {5            , 20               , 6                , 25                , 25               , 5                , 144             , 10                , 2                , 4                };
-unsigned long maxvalues[] =         {50           , 200              , 200              , 40                , 200              , 200              , 150             , 100               , 5                , 15               };
+unsigned long maxvalues[] =         {50           , 200              , values[1]        , 40                , 200              , values[4]        , LED_COUNT       , 100               , 5                , 15               };
 unsigned long minvalues[] =         {0            , 1                , 1                , 8                 , 1                , 1                , 40              , 10                , 1                , 1                };
 unsigned long fertigevalues[] =     {0            , 20000            , 6000             , 0                 , 25000            , 5000             , 0               , 0                 , 0                , 0                };
 
@@ -47,7 +47,9 @@ int potiPin = A0;
 int rotVar = 0 ;            // Variable zum speichern der Werte für die Ausgabe
 int gruenVar = 0 ;          // Variable zum speichern der Werte für die Ausgabe
 int blauVar = 0 ;           // Variable zum speichern der Werte für die Ausgabe
-int potiVar = 0 ;           // Variable zum speichern des Potentiometereingangs  
+int potiVar ;           // Variable zum speichern des Potentiometereingangs  
+int oldPotiVar = 0;
+int oldBrightness = 0;
 
 void setup() {
 
@@ -66,7 +68,6 @@ void setup() {
 void loop() 
 {
   Serial.println(analogRead(A2));
-  strip.setBrightness(10);
   setMode();
   if(mode == 1)
   {
@@ -74,12 +75,23 @@ void loop()
   }
   if(mode == 2)
   {
+    setColorBrightness();
     oneColor();
   }
   strip.show();
 }
 
-void setMode()
+void setColorBrightness()
+{
+  if(oldBrightness - analogRead(A3) >= 10 || oldBrightness - analogRead(A3) <= -10)
+  {
+  strip.setBrightness(map(analogRead(A3), 0, 1024, 0, 101));
+  oldBrightness = analogRead(A3);
+  }
+}
+
+
+void setMode()    // zwischen modes wechseln
 {
   if(analogRead(A2) < 500)
   {
@@ -93,7 +105,10 @@ void setMode()
 
 void oneColor()
 {
-  potiVar = analogRead(potiPin) ;
+  if(potiVar - analogRead(A0) >= 10 || potiVar - analogRead(A0) <= -10)
+  {
+  potiVar = analogRead(A0);
+  }
   
   if(potiVar < 341)      // Unteres Drittel des Potenziometerbereichs (0-340)
   {                  
